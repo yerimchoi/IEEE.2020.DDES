@@ -1,6 +1,6 @@
 # TBD.2020.DDES
 Reproduction code for:
 
-"DDES: A Distribution-based Dynamic Ensemble Selection Method"
+Ye-Rim Choi & Dong-Joon Lim, "DDES: A Distribution-based Dynamic Ensemble Selection Method" Pattern Recognition (2020): (TBD).
 
 TBD
