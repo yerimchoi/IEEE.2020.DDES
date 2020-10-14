@@ -107,8 +107,10 @@ def define_model(model_name):
 
 
 class DDES:
-    def __init__(self, file):
+    def __init__(self, file, kmin, accthreshold):
         self.file = file
+        self.kmin = kmin
+        self.accthreshold = accthreshold
         
     def _load_data(self):
         x = self.file.drop(['class'], axis=1)
@@ -152,7 +154,6 @@ class DDES:
                 for ind in indices:
                     self.std[ind] = 1
                     
-            kmin = 7
             breakindex = 0
             base_pool = []
             
@@ -175,7 +176,7 @@ class DDES:
                             r_valx.append(val)
                             r_valy.append(self.val_y[i])
                             
-                    if len(r_valx) < kmin:
+                    if len(r_valx) < self.kmin:
                         s += 0.1
                         std = self.std * s
                         continue
@@ -197,14 +198,14 @@ class DDES:
                     correct = np.where(np.array(pred_list) == r_valy)[0]
                     acc = len(correct) / len(r_valy)
                     
-                    if acc >= 0.3:
+                    if acc >= self.accthreshold:
                         base_pool.append(base)
                 
                 if (len(base_pool)) > 0:
                     break
                 
                 else:
-                    kmin += 1
+                    self.kmin += 1
                     breakindex += 1                    
                     continue
 
@@ -250,7 +251,6 @@ class DDES:
         ite = 0
         
         for x in self.test_x:
-            kmin = 7
             breakindex = 0
             base_pool = []
             
@@ -263,7 +263,7 @@ class DDES:
                                 metric='mahalanobis', 
                                 metric_params={'V': np.cov(self.val_x)})
                 nn.fit(self.val_x)
-                mah_list = nn.kneighbors(np.array(x).reshape(1,-1), kmin, return_distance=False)
+                mah_list = nn.kneighbors(np.array(x).reshape(1,-1), self.kmin, return_distance=False)
                 
                 r_valx = self.val_x[mah_list, :][0]
                 r_valy = self.val_y[mah_list][0]
@@ -278,14 +278,14 @@ class DDES:
                     correct = np.where(np.array(pred_list) == r_valy)[0]
                     acc = len(correct) / len(r_valy)
                     
-                    if acc >= 0.3:
+                    if acc >= self.accthreshold:
                         base_pool.append(base)
                 
                 if (len(base_pool)) > 0:
                     break
                 
                 else:
-                    kmin += 1
+                    self.kmin += 1
                     breakindex += 1                    
                     continue
 
@@ -347,7 +347,7 @@ if __name__ == "__main__":
                     print(data)
                     print(">>> {} th iteration".format(_))
           
-                    ddes = DDES(csv_file)
+                    ddes = DDES(csv_file, kmin = 7, accthreshold = 0.3)
                     data_index = ddes._load_data()
                   
                     if data_index == 1:
