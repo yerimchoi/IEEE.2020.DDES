@@ -215,23 +215,22 @@ class DDES:
                 final_pred.append(pred)
             
             fin = Counter(final_pred)
+            fin = sorted(fin.items(), key = lambda x: x[1], reverse = True)
 
-            if len(fin.keys()) == 1:
-                test_pred.append(list(fin.keys())[0])
+            if len(fin) == 1:
+                test_pred.append(fin[0][0])
                 
             else:
-                maj_class = list(fin.keys())[0]
-                maj_num = fin[maj_class]
+                maj_class = fin[0][0]
+                maj_num = fin[0][1]
                 same_num = [maj_class]
                 
-                for cl in list(fin.keys())[1:]:
-                    if fin[cl] > maj_num:
-                        maj_class = cl
-                        maj_num = fin[cl]
-                    elif fin[cl] < maj_num:
-                        continue
-                    elif fin[cl] == maj_num:
-                        same_num.append(cl)
+                for cl in fin[1:]:
+                    if fin[cl][1] > maj_num:
+                        maj_class = cl[0]
+                        maj_num = fin[cl][1]
+                    elif fin[cl][1] == maj_num:
+                        same_num.append(cl[0])
 
                 if len(same_num) == 1:
                     test_pred.append(maj_class)
@@ -294,25 +293,24 @@ class DDES:
             for c in base_pool:
                 pred = c.predict(x.reshape(1, -1))[0]
                 final_pred.append(pred)
-            
+                        
             fin = Counter(final_pred)
+            fin = sorted(fin.items(), key = lambda x: x[1], reverse = True)
 
-            if len(fin.keys()) == 1:
-                test_pred.append(list(fin.keys())[0])
+            if len(fin) == 1:
+                test_pred.append(fin[0][0])
                 
             else:
-                maj_class = list(fin.keys())[0]
-                maj_num = fin[maj_class]
+                maj_class = fin[0][0]
+                maj_num = fin[0][1]
                 same_num = [maj_class]
                 
-                for cl in list(fin.keys())[1:]:
-                    if fin[cl] > maj_num:
-                        maj_class = cl
-                        maj_num = fin[cl]
-                    elif fin[cl] < maj_num:
-                        continue
-                    elif fin[cl] == maj_num:
-                        same_num.append(cl)
+                for cl in fin[1:]:
+                    if fin[cl][1] > maj_num:
+                        maj_class = cl[0]
+                        maj_num = fin[cl][1]
+                    elif fin[cl][1] == maj_num:
+                        same_num.append(cl[0])
 
                 if len(same_num) == 1:
                     test_pred.append(maj_class)
