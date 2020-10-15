@@ -222,21 +222,22 @@ class DDES:
             else:
                 maj_class = list(fin.keys())[0]
                 maj_num = fin[maj_class]
-                index = True
+                same_num = [maj_class]
                 
                 for cl in list(fin.keys())[1:]:
                     if fin[cl] > maj_num:
                         maj_class = cl
                         maj_num = fin[cl]
-                        index = False
                     elif fin[cl] < maj_num:
-                        index = False
+                        continue
+                    elif fin[cl] == maj_num:
+                        same_num.append(cl)
 
-                if index == False:
+                if len(same_num) == 1:
                     test_pred.append(maj_class)
                     
-                elif index == True:
-                    random_class = random.choice(list(fin.keys()))
+                elif len(same_num) > 1:
+                    random_class = random.choice(same_num)
                     test_pred.append(random_class)
             
             ite += 1
@@ -302,21 +303,22 @@ class DDES:
             else:
                 maj_class = list(fin.keys())[0]
                 maj_num = fin[maj_class]
-                index = True
+                same_num = [maj_class]
                 
                 for cl in list(fin.keys())[1:]:
                     if fin[cl] > maj_num:
                         maj_class = cl
                         maj_num = fin[cl]
-                        index = False
                     elif fin[cl] < maj_num:
-                        index = False
+                        continue
+                    elif fin[cl] == maj_num:
+                        same_num.append(cl)
 
-                if index == False:
+                if len(same_num) == 1:
                     test_pred.append(maj_class)
                     
-                elif index == True:
-                    random_class = random.choice(list(fin.keys()))
+                elif len(same_num) > 1:
+                    random_class = random.choice(same_num)
                     test_pred.append(random_class)
             
             ite += 1
