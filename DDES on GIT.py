@@ -226,10 +226,7 @@ class DDES:
                 same_num = [maj_class]
                 
                 for cl in fin[1:]:
-                    if fin[cl][1] > maj_num:
-                        maj_class = cl[0]
-                        maj_num = fin[cl][1]
-                    elif fin[cl][1] == maj_num:
+                    if cl[1] == maj_num:
                         same_num.append(cl[0])
 
                 if len(same_num) == 1:
@@ -306,10 +303,7 @@ class DDES:
                 same_num = [maj_class]
                 
                 for cl in fin[1:]:
-                    if fin[cl][1] > maj_num:
-                        maj_class = cl[0]
-                        maj_num = fin[cl][1]
-                    elif fin[cl][1] == maj_num:
+                    if cl[1] == maj_num:
                         same_num.append(cl[0])
 
                 if len(same_num) == 1:
