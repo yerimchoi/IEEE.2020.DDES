@@ -71,6 +71,7 @@ def define_model(model_name):
         model = SVC(C = round(random.uniform(1, 15),2), 
                     gamma = round(random.uniform(0.01, 1), 2),
                     kernel = randomlist(kernel_list),
+                    probability = True,
                     random_state = i)
         
     elif model_name == 'dt':
