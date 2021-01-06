@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jan  6 17:19:42 2021
-
-@author: lvaid
-"""
-
 #########################################################################################################################
 ### Project  :  Distribution-based Dynamic Ensemble Selection
 ### Script   :  DDES on GIT.py
