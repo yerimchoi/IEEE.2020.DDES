@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jan  6 17:19:42 2021
+
+@author: lvaid
+"""
+
 #########################################################################################################################
 ### Project  :  Distribution-based Dynamic Ensemble Selection
 ### Script   :  DDES on GIT.py
@@ -22,6 +29,9 @@ from sklearn.neighbors import KNeighborsClassifier, NearestNeighbors
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import GradientBoostingClassifier
 from xgboost import XGBClassifier
+
+from deslib.dcs import OLA, MCB, LCA
+from deslib.des import KNORAE, KNORAU, DESP, METADES
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
@@ -106,11 +116,10 @@ def define_model(model_name):
 
     return model
 
-
-class DDES:
-    def __init__(self, file, kmin, accthreshold):
+class DES:
+    def __init__(self, file, k, accthreshold):
         self.file = file
-        self.kmin = kmin
+        self.k = k
         self.accthreshold = accthreshold
         
     def _load_data(self):
@@ -177,7 +186,7 @@ class DDES:
                             r_valx.append(val)
                             r_valy.append(self.val_y[i])
                             
-                    if len(r_valx) < self.kmin:
+                    if len(r_valx) < self.k:
                         s += 0.1
                         std = self.std * s
                         continue
@@ -206,7 +215,7 @@ class DDES:
                     break
                 
                 else:
-                    self.kmin += 1
+                    self.k += 1
                     breakindex += 1                    
                     continue
 
@@ -261,7 +270,7 @@ class DDES:
                                 metric='mahalanobis', 
                                 metric_params={'V': np.cov(self.val_x)})
                 nn.fit(self.val_x)
-                mah_list = nn.kneighbors(np.array(x).reshape(1,-1), self.kmin, return_distance=False)
+                mah_list = nn.kneighbors(np.array(x).reshape(1,-1), self.k, return_distance=False)
                 
                 r_valx = self.val_x[mah_list, :][0]
                 r_valy = self.val_y[mah_list][0]
@@ -283,7 +292,7 @@ class DDES:
                     break
                 
                 else:
-                    self.kmin += 1
+                    self.k += 1
                     breakindex += 1                    
                     continue
 
@@ -318,6 +327,37 @@ class DDES:
 
         final_acc = accuracy_score(np.array(test_pred), self.test_y)
         return final_acc 
+    
+    def other_des(self):
+        # DES
+        knorau = KNORAU(self.base_pool)
+        knorae = KNORAE(self.base_pool)
+        desp = DESP(self.base_pool)
+        metades = METADES(self.base_pool)
+        # DCS 
+        lca = LCA(self.base_pool)
+        ola = OLA(self.base_pool)
+        mcb = MCB(self.base_pool)
+        
+        # Fitting DES and DCS        
+        knorau.fit(self.val_x, self.val_y)
+        knorae.fit(self.val_x, self.val_y)
+        desp.fit(self.val_x, self.val_y)
+        metades.fit(self.val_x, self.val_y)
+        lca.fit(self.val_x, self.val_y)
+        ola.fit(self.val_x, self.val_y)
+        mcb.fit(self.val_x, self.val_y)
+        
+        acc_knorau = knorau.score(self.test_x, self.test_y)
+        acc_knorae = knorae.score(self.test_x, self.test_y)
+        acc_desp = desp.score(self.test_x, self.test_y)
+        acc_metades = metades.score(self.test_x, self.test_y)
+        acc_lca = lca.score(self.test_x, self.test_y)
+        acc_ola = ola.score(self.test_x, self.test_y)
+        acc_mcb = mcb.score(self.test_x, self.test_y)
+        
+        result = [acc_knorau, acc_knorae, acc_desp, acc_metades, acc_lca, acc_ola, acc_mcb]
+        return result 
 
 #########################################################################################################################
 # Experiment
@@ -332,35 +372,30 @@ if __name__ == "__main__":
 
     for data in data_list:
         csv_file = pd.read_csv(data_path + data)
+        result = []
 
-        result_ddesi = []
-        result_ddesm = []
-        
         for _ in range(100):
             while True:
                 try:
                     print(data)
                     print(">>> {} th iteration".format(_))
           
-                    ddes = DDES(csv_file, kmin = 7, accthreshold = 0.3)
-                    data_index = ddes._load_data()
+                    des = DES(csv_file, k = 7, accthreshold = 0.3)
+                    data_index = des._load_data()
                   
                     if data_index == 1:
                         continue
                   
                     else:            
-                        ddesi_acc = ddes.ddesI()
-                        ddesm_acc = ddes.ddesM()
+                        ddesi_acc = des.ddesI()
+                        ddesm_acc = des.ddesM()
+                        others_acc = des.other_des()
                         
-                        result_ddesi.append(ddesi_acc)
-                        result_ddesm.append(ddesm_acc)
-                      
-                        df_ddesi = pd.DataFrame(result_ddesi, columns = ['ddesi'])
-                        df_ddesm = pd.DataFrame(result_ddesm, columns = ['ddesm'])
+                        others_acc.extend([ddesi_acc, ddesm_acc])
+                        result.append(others_acc)
                         
-                        df_ddesi.to_csv(file_path + 'ddesi_' + data, index = False, header = True)
-                        df_ddesm.to_csv(file_path + 'ddesm_' + data, index = False, header = True)
-
+                        df_result = pd.DataFrame(result, columns = ['knorau', 'knorae', 'desp', 'metades', 'lca', 'ola', 'mcb', 'ddesi', 'ddesm'])
+                        df_result.to_csv(file_path + data, index = False, header = True)
                         break
           
                 except (np.linalg.LinAlgError, ZeroDivisionError):
