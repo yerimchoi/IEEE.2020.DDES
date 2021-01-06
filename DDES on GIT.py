@@ -323,10 +323,10 @@ class DES:
     
     def other_des(self):
         # DES
-        knorau = KNORAU(self.base_pool)
-        knorae = KNORAE(self.base_pool)
-        desp = DESP(self.base_pool)
-        metades = METADES(self.base_pool)
+        knorau = KNORAU(self.base_pool, IH_rate = 0.0)
+        knorae = KNORAE(self.base_pool, IH_rate = 0.0)
+        desp = DESP(self.base_pool, IH_rate = 0.0)
+        metades = METADES(self.base_pool, IH_rate = 0.0)
         # DCS 
         lca = LCA(self.base_pool)
         ola = OLA(self.base_pool)
