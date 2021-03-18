@@ -118,24 +118,18 @@ class DES:
     def _load_data(self):
         x = self.file.drop(['class'], axis=1)
         y = self.file['class']
-        
-        try:
-            self.train_xo, self.test_x, self.train_yo, self.test_y = train_test_split(x, y, test_size = 0.25, stratify = y)
-            self.train_x, self.val_x, self.train_y, self.val_y = train_test_split(self.train_xo, self.train_yo, test_size = 0.3, stratify = self.train_yo)
-            
-            ss = StandardScaler()
-            self.train_xo = ss.fit_transform(self.train_xo)
-            self.train_x, self.val_x, self.test_x = ss.transform(self.train_x), ss.transform(self.val_x), ss.transform(self.test_x)
-            self.train_y, self.val_y, self.test_y = np.array(self.train_y), np.array(self.val_y), np.array(self.test_y)
 
-            return 0
-            
-        except ValueError:
-            return 1
+        self.train_xo, self.test_x, self.train_yo, self.test_y = train_test_split(x, y, test_size = 0.25, stratify = y)
+        self.train_x, self.val_x, self.train_y, self.val_y = train_test_split(self.train_xo, self.train_yo, test_size = 0.3, stratify = self.train_yo)
+
+        ss = StandardScaler()
+        self.train_xo = ss.fit_transform(self.train_xo)
+        self.train_x, self.val_x, self.test_x = ss.transform(self.train_x), ss.transform(self.val_x), ss.transform(self.test_x)
+        self.train_y, self.val_y, self.test_y = np.array(self.train_y), np.array(self.val_y), np.array(self.test_y)
             
     def _make_base_pool(self):
-        models = ['nn']*11 + ['svc']*12 + ['dt']*6 + ['lr']*5 + ['gb']*5 +\
-                 ['knn']*6 + ['xgb']*6 + ['nb']
+        models = ['nn']*7 + ['svc']*7 + ['dt']*7 + ['lr']*7 + ['gb']*7 +\
+                 ['knn']*7 + ['xgb']*7 + ['nb']*2
         
         self.base_pool_list = [define_model(x) for x in models]
         
@@ -144,19 +138,16 @@ class DES:
             self.base_pool.append(base.fit(self.train_x, self.train_y))
                
     def ddesI(self):
-        self._make_base_pool()
-        
-        test_pred = []
-        ite = 0
-        
-        for x in self.test_x:
-            self.std = np.std(self.train_x, axis = 0)
-            
-            if 0 in self.std:
+        self.std = np.std(self.train_x, axis = 0)
+        if 0 in self.std:
                 indices = list(np.where(self.std == 0)[0])
                 for ind in indices:
                     self.std[ind] = 1
                     
+        test_pred = []
+        ite = 0
+        
+        for x in self.test_x:    
             breakindex = 0
             base_pool = []
             
@@ -217,27 +208,7 @@ class DES:
                 pred = c.predict(x.reshape(1, -1))[0]
                 final_pred.append(pred)
             
-            fin = Counter(final_pred)
-            fin = sorted(fin.items(), key = lambda x: x[1], reverse = True)
-
-            if len(fin) == 1:
-                test_pred.append(fin[0][0])
-                
-            else:
-                maj_class = fin[0][0]
-                maj_num = fin[0][1]
-                same_num = [maj_class]
-                
-                for cl in fin[1:]:
-                    if cl[1] == maj_num:
-                        same_num.append(cl[0])
-
-                if len(same_num) == 1:
-                    test_pred.append(maj_class)
-                    
-                elif len(same_num) > 1:
-                    random_class = random.choice(same_num)
-                    test_pred.append(random_class)
+            test_pred.append(max(set(final_pred), key = final_pred.count))
             
             ite += 1
 
@@ -294,27 +265,7 @@ class DES:
                 pred = c.predict(x.reshape(1, -1))[0]
                 final_pred.append(pred)
                         
-            fin = Counter(final_pred)
-            fin = sorted(fin.items(), key = lambda x: x[1], reverse = True)
-
-            if len(fin) == 1:
-                test_pred.append(fin[0][0])
-                
-            else:
-                maj_class = fin[0][0]
-                maj_num = fin[0][1]
-                same_num = [maj_class]
-                
-                for cl in fin[1:]:
-                    if cl[1] == maj_num:
-                        same_num.append(cl[0])
-
-                if len(same_num) == 1:
-                    test_pred.append(maj_class)
-                    
-                elif len(same_num) > 1:
-                    random_class = random.choice(same_num)
-                    test_pred.append(random_class)
+            test_pred.append(max(set(final_pred), key = final_pred.count))
             
             ite += 1
 
@@ -362,34 +313,29 @@ if __name__ == "__main__":
 
     data_list = os.listdir(data_path)
     data_list.sort()
-
+    result = []
+    
     for data in data_list:
         csv_file = pd.read_csv(data_path + data)
-        result = []
+        each_result = []
 
         for _ in range(100):
-            while True:
-                try:
-                    print(data)
-                    print(">>> {} th iteration".format(_))
-          
-                    des = DES(csv_file, k = 7, accthreshold = 0.3)
-                    data_index = des._load_data()
-                  
-                    if data_index == 1:
-                        continue
-                  
-                    else:            
-                        ddesi_acc = des.ddesI()
-                        ddesm_acc = des.ddesM()
-                        others_acc = des.other_des()
-                        
-                        others_acc.extend([ddesi_acc, ddesm_acc])
-                        result.append(others_acc)
-                        
-                        df_result = pd.DataFrame(result, columns = ['knorau', 'knorae', 'desp', 'metades', 'lca', 'ola', 'mcb', 'ddesi', 'ddesm'])
-                        df_result.to_csv(file_path + data, index = False, header = True)
-                        break
-          
-                except (np.linalg.LinAlgError, ZeroDivisionError):
-                    continue
+            print(data)
+            print(">>> {} th iteration".format(_))
+
+            des = DES(csv_file, k = 7, accthreshold = 0.3)
+            des._load_data()
+            des._make_base_pool()
+            
+            ddesi_acc = des.ddesI()
+            ddesm_acc = des.ddesM()
+            others_acc = des.other_des()
+
+            others_acc.extend([ddesi_acc, ddesm_acc])
+            each_result.append(others_acc)
+            
+        result.append(np.mean(each_result, axis = 0))
+
+    df_result = pd.DataFrame(result, columns = ['knorau', 'knorae', 'desp', 'metades', 'lca', 'ola', 'mcb', 'ddesi', 'ddesm'])
+    df_result.to_csv(file_path + data, index = False, header = True)
+
