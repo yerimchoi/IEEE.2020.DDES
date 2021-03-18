@@ -140,9 +140,9 @@ class DES:
     def ddesI(self):
         self.std = np.std(self.train_x, axis = 0)
         if 0 in self.std:
-                indices = list(np.where(self.std == 0)[0])
-                for ind in indices:
-                    self.std[ind] = 1
+            indices = list(np.where(self.std == 0)[0])
+            for ind in indices:
+                self.std[ind] = 1
                     
         test_pred = []
         ite = 0
@@ -216,8 +216,6 @@ class DES:
         return final_acc 
     
     def ddesM(self):
-        self._make_base_pool()
-        
         test_pred = []
         ite = 0
         
