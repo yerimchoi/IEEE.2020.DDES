@@ -269,34 +269,3 @@ class DES:
 
         final_acc = accuracy_score(np.array(test_pred), self.test_y)
         return final_acc 
-    
-    def other_des(self):
-        # DES
-        knorau = KNORAU(self.base_pool, IH_rate = 0.0)
-        knorae = KNORAE(self.base_pool, IH_rate = 0.0)
-        desp = DESP(self.base_pool, IH_rate = 0.0)
-        metades = METADES(self.base_pool, IH_rate = 0.0)
-        # DCS 
-        lca = LCA(self.base_pool)
-        ola = OLA(self.base_pool)
-        mcb = MCB(self.base_pool)
-        
-        # Fitting DES and DCS        
-        knorau.fit(self.val_x, self.val_y)
-        knorae.fit(self.val_x, self.val_y)
-        desp.fit(self.val_x, self.val_y)
-        metades.fit(self.val_x, self.val_y)
-        lca.fit(self.val_x, self.val_y)
-        ola.fit(self.val_x, self.val_y)
-        mcb.fit(self.val_x, self.val_y)
-        
-        acc_knorau = knorau.score(self.test_x, self.test_y)
-        acc_knorae = knorae.score(self.test_x, self.test_y)
-        acc_desp = desp.score(self.test_x, self.test_y)
-        acc_metades = metades.score(self.test_x, self.test_y)
-        acc_lca = lca.score(self.test_x, self.test_y)
-        acc_ola = ola.score(self.test_x, self.test_y)
-        acc_mcb = mcb.score(self.test_x, self.test_y)
-        
-        result = [acc_knorau, acc_knorae, acc_desp, acc_metades, acc_lca, acc_ola, acc_mcb]
-        return result 
