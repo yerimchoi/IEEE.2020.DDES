@@ -26,7 +26,7 @@ from xgboost import XGBClassifier
 from deslib.dcs import OLA, MCB, LCA
 from deslib.des import KNORAE, KNORAU, DESP, METADES
 
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
@@ -122,7 +122,7 @@ class DES:
         self.train_xo, self.test_x, self.train_yo, self.test_y = train_test_split(x, y, test_size = 0.25, stratify = y)
         self.train_x, self.val_x, self.train_y, self.val_y = train_test_split(self.train_xo, self.train_yo, test_size = 0.3, stratify = self.train_yo)
 
-        ss = StandardScaler()
+        ss = MinMaxScaler()
         self.train_xo = ss.fit_transform(self.train_xo)
         self.train_x, self.val_x, self.test_x = ss.transform(self.train_x), ss.transform(self.val_x), ss.transform(self.test_x)
         self.train_y, self.val_y, self.test_y = np.array(self.train_y), np.array(self.val_y), np.array(self.test_y)
